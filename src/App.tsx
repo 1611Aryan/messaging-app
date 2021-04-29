@@ -1,26 +1,32 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useEffect } from "react";
+import io from "socket.io-client";
+import styled from "styled-components";
+import Chat from "./Components/Chat";
+import Input from "./Components/Input";
+import Nav from "./Components/Nav";
 
-function App() {
+const App = () => {
+  useEffect(() => {
+    const socket = io("http://localhost:5000");
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <StyledApp>
+      <Nav />
+      <Chat />
+      <Input />
+    </StyledApp>
   );
-}
+};
+
+const StyledApp = styled.div`
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+`;
 
 export default App;
