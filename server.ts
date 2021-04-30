@@ -12,7 +12,7 @@ const server = http.createServer(app)
 
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:3000',
+        origin: process.env.NODE_ENV === 'production' ? 'https://message200.netlify.app/' : 'http://localhost:3000',
         methods: ['Get', 'POST']
     }
 })
@@ -23,25 +23,29 @@ app.use(cors());
 
 io.on('connection', (socket) => {
     console.log('User Connected')
+    socket.on('message', (msg: string) => {
+        io.emit('message', msg)
+    })
     socket.on('disconnect', () => {
         console.log('Disconnected')
     })
 })
 
+
 //?Serving the static files
-if (process.env.NODE_ENV === "production") {
-    app.use(express.static(path.join(__dirname, "..", "..", "client", "build")));
-    app.use(
-        "/static",
-        express.static(
-            path.join(__dirname, "..", "..", "client", "build", "static")
-        )
-    );
-    app.get("*", (req: Request, res: Response) => {
-        res.sendFile("index.html", {
-            root: path.join(__dirname, "..", "..", "client", "build"),
-        });
-    });
-}
+// if (process.env.NODE_ENV === "production") {
+//     app.use(express.static(path.join(__dirname, "..", "..", "client", "build")));
+//     app.use(
+//         "/static",
+//         express.static(
+//             path.join(__dirname, "..", "..", "client", "build", "static")
+//         )
+//     );
+//     app.get("*", (req: Request, res: Response) => {
+//         res.sendFile("index.html", {
+//             root: path.join(__dirname, "..", "..", "client", "build"),
+//         });
+//     });
+// }
 
 server.listen(5000, () => console.log(`Server running at Port 5000`));
