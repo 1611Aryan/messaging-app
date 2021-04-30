@@ -22,6 +22,6 @@
     "dev": "nodemon server.ts",
     "build": "tsc -p .",
     "start": " node server.js",
-    "heroku-postbuild": "yarn build && cd build && yarn start"
+    "heroku-postbuild": "yarn && yarn build && cd build && yarn start"
   }
 }
