@@ -19,7 +19,9 @@ const Chat: React.FC = () => {
 
   //Componetnt did mount
   useEffect(() => {
-    socket = io(ENDPOINT);
+    socket = io(ENDPOINT, {
+      transports: ["websocket"],
+    });
 
     return () => {
       socket.disconnect();
