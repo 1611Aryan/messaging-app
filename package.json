@@ -19,7 +19,7 @@
     "tsc": "tsc",
     "dev": "nodemon server.ts",
     "build": "tsc -p .",
-    "start": " node server.js",
+    "start": " node build/server.js",
     "heroku-postbuild": "yarn && yarn build"
   }
 }
