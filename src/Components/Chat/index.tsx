@@ -27,7 +27,7 @@ const Chat: React.FC = () => {
   //State
   const [messages, setMessages] = useState<message[]>([]);
 
-  const { user } = useUser();
+  const { user, setUser } = useUser();
   const history = useHistory();
 
   //Componetnt did mount
@@ -59,9 +59,15 @@ const Chat: React.FC = () => {
     console.log("Message Sent");
   };
 
+  const logout = () => {
+    setUser({ name: null, id: null });
+    socket.disconnect();
+    history.push("/");
+  };
+
   return (
     <StyledChat>
-      <Nav />
+      <Nav logout={logout} />
       <StyledMain>
         <Participants />
         <div className="chat">

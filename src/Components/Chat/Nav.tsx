@@ -1,15 +1,11 @@
-import { setupMaster } from "node:cluster";
-import { useHistory } from "react-router";
 import styled from "styled-components";
 import { useUser } from "../../Providers/UserProvider";
 
-const Nav: React.FC = () => {
-  const { user, setUser } = useUser();
-  const history = useHistory();
+const Nav: React.FC<{ logout: () => void }> = ({ logout }) => {
+  const { user } = useUser();
 
   const clickHandler = () => {
-    setUser({ name: null, id: null });
-    history.push("/");
+    logout();
   };
 
   return (
