@@ -1,27 +1,46 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { useUser } from "../../Providers/UserProvider";
 
-const Input: React.FC<{ sendMessage: (msg: string) => void }> = ({
-  sendMessage,
-}) => {
+interface message {
+  message: string;
+  sender: {
+    name: string;
+    id: string;
+  };
+}
+
+const Input: React.FC<{
+  sendMessage: (msg: message) => void;
+}> = ({ sendMessage }) => {
+  const { user } = useUser();
+
   //State
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState({
+    message: "",
+    sender: {
+      name: user.name || "",
+      id: user.id || "",
+    },
+  });
 
   //Handlers
 
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMessage(e.target.value);
+    setMessage({ ...message, message: e.target.value });
   };
 
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    sendMessage(message);
-    setMessage("");
+    if (message.message !== "" && message.sender.name !== "") {
+      sendMessage(message);
+    }
+    setMessage({ ...message, message: "" });
   };
 
   return (
     <StyledInput onSubmit={submitHandler}>
-      <input value={message} type="text" onChange={changeHandler} />
+      <input value={message.message} type="text" onChange={changeHandler} />
       <button>Send</button>
     </StyledInput>
   );

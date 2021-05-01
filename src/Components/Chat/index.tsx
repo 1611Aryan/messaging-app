@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { useHistory } from "react-router";
 import io from "socket.io-client";
 import styled from "styled-components";
+import { useUser } from "../../Providers/UserProvider";
 import Input from "./Input";
 import Messages from "./Messages";
 import Nav from "./Nav";
@@ -13,15 +15,32 @@ const ENDPOINT =
     ? "https://message200.herokuapp.com/"
     : "http://localhost:5000";
 
+interface message {
+  message: string;
+  sender: {
+    name: string;
+    id: string;
+  };
+}
+
 const Chat: React.FC = () => {
   //State
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<message[]>([]);
+
+  const { user } = useUser();
+  const history = useHistory();
 
   //Componetnt did mount
   useEffect(() => {
+    if (user.name === null || user.id === "") {
+      history.push("/");
+    }
+
     socket = io(ENDPOINT, {
       transports: ["websocket"],
     });
+
+    socket.emit("join", user);
 
     return () => {
       socket.disconnect();
@@ -29,13 +48,13 @@ const Chat: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    socket.on("message", (msg: string) => {
+    socket.on("message", (msg: message) => {
       setMessages(messages => [...messages, msg]);
     });
     console.log("Message Recieved");
   }, []);
 
-  const sendMessage = (msg: string) => {
+  const sendMessage = (msg: message) => {
     socket.emit("message", msg);
     console.log("Message Sent");
   };
