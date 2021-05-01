@@ -1,24 +1,33 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const express = require("express");
-const cors = require("cors");
-const http = require("http");
-const socket_io_1 = require("socket.io");
-const app = express();
-const server = http.createServer(app);
-const io = new socket_io_1.Server(server, {
+exports.__esModule = true;
+var express = require("express");
+var cors = require("cors");
+var http = require("http");
+var socket_io_1 = require("socket.io");
+var PORT = process.env.PORT || 5000;
+var app = express();
+var server = http.createServer(app);
+var io = new socket_io_1.Server(server, {
     cors: {
         origin: process.env.NODE_ENV === 'production' ? 'https://message200.netlify.app/' : 'http://localhost:3000',
         methods: ['Get', 'POST']
     }
 });
 app.use(cors());
-io.on('connection', (socket) => {
+var users = [];
+io.on('connection', function (socket) {
     console.log('User Connected');
-    socket.on('message', (msg) => {
+    socket.on('join', function (user) {
+        socket.broadcast.emit('message', {
+            message: user.name + " joined",
+            sender: { id: 'admin' },
+            name: user.name
+        });
+    });
+    socket.on('message', function (msg) {
         io.emit('message', msg);
     });
-    socket.on('disconnect', () => {
+    socket.on('disconnect', function () {
         console.log('Disconnected');
     });
 });
@@ -37,5 +46,5 @@ io.on('connection', (socket) => {
 //         });
 //     });
 // }
-server.listen(5000, () => console.log(`Server running at Port 5000`));
+server.listen(PORT, function () { return console.log("Server running at Port 5000"); });
 //# sourceMappingURL=server.js.map
