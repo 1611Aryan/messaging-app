@@ -39,20 +39,41 @@ io.on('connection', (socket) => {
     socket.on('join', (user: user) => {
 
         users.push({ socketId: socket.id, name: user.name, id: user.id });
+
         socket.broadcast.emit('message', {
             message: `${user.name} joined`,
             sender: { id: 'admin', name: null },
         })
-        console.log(users)
+
+        io.emit('join', users)
+
+    })
+
+    let timeout: any;
+    let typing = false
+    socket.on('typing', (user: user) => {
+        if (!typing) {
+            socket.broadcast.emit('typing', user)
+            typing = true
+            console.log('Typing')
+        }
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            socket.broadcast.emit('stopped-typing', user)
+            typing = false
+        }, 1500)
+
     })
 
     socket.on('message', (msg: message) => {
         io.emit('message', msg)
     })
+
     socket.on('disconnect', () => {
         const index = users.findIndex((user) => user.socketId === socket.id)
         if (index >= 0) {
             socket.broadcast.emit('message', { message: `${users[index].name} left :/`, sender: { id: 'admin', name: null } })
+            socket.broadcast.emit('left', users[index])
             users.splice(index, 1)
         }
         console.log('Disconnected')
