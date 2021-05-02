@@ -43,16 +43,15 @@ const StyledChat = styled.div`
       align-self: flex-end;
     }
     .admin {
-      width: auto !important;
       align-self: center;
-      padding: 0.5rem 0rem !important;
+      padding: 0.5rem 0.2rem !important;
       border-radius: 10px !important;
       display: flex;
       justify-content: center;
       align-items: center;
 
       p {
-        padding: 0 !important;
+        padding: 0 0.2rem !important;
       }
     }
     .recieved {

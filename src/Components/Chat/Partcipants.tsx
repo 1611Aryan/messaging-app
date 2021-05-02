@@ -1,24 +1,19 @@
 import styled from "styled-components";
+import Participant from "./Participant";
 import SearchBar from "./SearchBar";
-import profilePicture from "./../../Media/profile.png";
 
-const Participants: React.FC = () => {
+import { user } from "./";
+
+const Participants: React.FC<{
+  participants: user[];
+}> = ({ participants }) => {
   return (
     <StyledPartcipants>
       <SearchBar />
       <ul>
-        <li>
-          <img src={profilePicture} alt="profile" />
-          <span>Harry</span>
-        </li>
-        <li>
-          <img src={profilePicture} alt="profile" />
-          <span>Ron</span>
-        </li>
-        <li>
-          <img src={profilePicture} alt="profile" />
-          <span>Hermione</span>
-        </li>
+        {participants.map(participant => (
+          <Participant participant={participant} key={participant.id} />
+        ))}
       </ul>
     </StyledPartcipants>
   );
@@ -37,26 +32,6 @@ const StyledPartcipants = styled.div`
     font-family: var(--fontPara);
 
     border-right: 2px solid var(--tertiary);
-    li {
-      width: 100%;
-      padding: 1.5rem 1rem;
-      font-size: 1.1rem;
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      cursor: pointer;
-
-      background: var(--secondary);
-      img {
-        width: 15%;
-        border-radius: 50%;
-        object-fit: cover;
-        margin: 0 1rem 0 0;
-      }
-      & + li {
-        border-top: 1px solid var(--tertiary);
-      }
-    }
   }
 `;
 export default Participants;

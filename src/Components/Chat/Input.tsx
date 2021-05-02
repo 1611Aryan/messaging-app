@@ -12,7 +12,8 @@ interface message {
 
 const Input: React.FC<{
   sendMessage: (msg: message) => void;
-}> = ({ sendMessage }) => {
+  typing: () => void;
+}> = ({ sendMessage, typing }) => {
   const { user } = useUser();
 
   //State
@@ -28,6 +29,7 @@ const Input: React.FC<{
 
   const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMessage({ ...message, message: e.target.value });
+    typing();
   };
 
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {

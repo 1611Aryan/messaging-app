@@ -15,38 +15,39 @@ const ENDPOINT =
     ? "https://message200.herokuapp.com/"
     : "http://localhost:5000";
 
+export interface user {
+  name: string;
+  id: string;
+  typing?: boolean;
+}
 interface message {
   message: string;
-  sender: {
-    name: string;
-    id: string;
-  };
+  sender: user;
 }
 
 const Chat: React.FC = () => {
   //State
   const [messages, setMessages] = useState<message[]>([]);
+  const [participants, setParticipants] = useState<user[]>([]);
 
   const { user, setUser } = useUser();
   const history = useHistory();
 
-  //Componetnt did mount
+  //* Componetnt did mount
   useEffect(() => {
     if (user.name === null || user.id === "") {
       history.push("/");
     }
-
     socket = io(ENDPOINT, {
       transports: ["websocket"],
     });
-
     socket.emit("join", user);
-
     return () => {
       socket.disconnect();
     };
   }, []);
 
+  //*For recieving Messages
   useEffect(() => {
     socket.on("message", (msg: message) => {
       setMessages(messages => [...messages, msg]);
@@ -54,9 +55,56 @@ const Chat: React.FC = () => {
     console.log("Message Recieved");
   }, []);
 
+  //*For adding members to participants list
+  useEffect(() => {
+    socket.on("join", (users: user[]) => {
+      const participants = users.filter(u => u.id !== user.id);
+      setParticipants(participants);
+    });
+  }, []);
+
+  //* For removing from particpants
+  useEffect(() => {
+    socket.on("left", (leftUser: user) => {
+      setParticipants(participants =>
+        participants.filter(p => p.id !== leftUser.id)
+      );
+    });
+  }, []);
+
+  //* Typing
+  useEffect(() => {
+    socket.on("typing", (user: user) => {
+      setParticipants(participants =>
+        participants.map(p => {
+          if (p.id === user.id) {
+            return { ...p, typing: true };
+          } else return p;
+        })
+      );
+    });
+  }, []);
+
+  //* Stopped Typing
+  useEffect(() => {
+    socket.on("stopped-typing", (user: user) => {
+      setParticipants(participants =>
+        participants.map(p => {
+          if (p.id === user.id) {
+            return { ...p, typing: false };
+          } else return p;
+        })
+      );
+    });
+  }, []);
+
   const sendMessage = (msg: message) => {
     socket.emit("message", msg);
     console.log("Message Sent");
+  };
+
+  const typing = () => {
+    socket.emit("typing", user);
   };
 
   const logout = () => {
@@ -69,10 +117,10 @@ const Chat: React.FC = () => {
     <StyledChat>
       <Nav logout={logout} />
       <StyledMain>
-        <Participants />
+        <Participants participants={participants} />
         <div className="chat">
           <Messages messages={messages} />
-          <Input sendMessage={sendMessage} />
+          <Input sendMessage={sendMessage} typing={typing} />
         </div>
       </StyledMain>
     </StyledChat>
