@@ -3,6 +3,7 @@ import { createContext, useContext, useState } from "react";
 interface user {
   name: null | string;
   id: null | string;
+  room: null | string;
 }
 
 const UserContext = createContext<{
@@ -12,6 +13,7 @@ const UserContext = createContext<{
   user: {
     name: null,
     id: null,
+    room: null,
   },
   setUser: () => {},
 });
@@ -24,6 +26,7 @@ export const UserProvider: React.FC<{
   const [user, setUser] = useState<user>({
     name: null,
     id: null,
+    room: null,
   });
 
   return (

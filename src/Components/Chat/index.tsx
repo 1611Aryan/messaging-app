@@ -108,7 +108,7 @@ const Chat: React.FC = () => {
   };
 
   const logout = () => {
-    setUser({ name: null, id: null });
+    setUser({ name: null, id: null, room: null });
     socket.disconnect();
     history.push("/");
   };
