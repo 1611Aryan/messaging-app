@@ -20,7 +20,7 @@ const io = new Server(server, {
 app.use(cors());
 
 interface user {
-    name: string; id: string
+    name: string; id: string; room: string
 }
 interface message {
     message: string;
@@ -30,51 +30,63 @@ interface message {
     };
 }
 
-const users: { name: string, id: string, socketId: string }[] = [];
+const users: { room: string; members: { name: string, id: string, socketId: string }[] }[] = [];
 
 
 io.on('connection', (socket) => {
-    console.log('User Connected')
 
+    console.log('Connected')
+    let room: string;
     socket.on('join', (user: user) => {
+        room = user.room
+        socket.join(room)
+        users.push({ room, members: [] })
 
-        users.push({ socketId: socket.id, name: user.name, id: user.id });
+        const index = users.findIndex((user) => user.room === room)
+        if (index >= 0) {
+            users[index].members.push({ socketId: socket.id, name: user.name, id: user.id });
 
-        socket.broadcast.emit('message', {
-            message: `${user.name} joined`,
-            sender: { id: 'admin', name: null },
-        })
+            socket.broadcast.to(room).emit('message', {
+                message: `${user.name} joined`,
+                sender: { id: 'admin', name: null },
+            })
 
-        io.emit('join', users)
+            io.to(room).emit('join', users[index].members)
+        }
+
 
     })
 
     let timeout: any;
     let typing = false
     socket.on('typing', (user: user) => {
+
         if (!typing) {
-            socket.broadcast.emit('typing', user)
+            socket.broadcast.to(room).emit('typing', user)
             typing = true
-            console.log('Typing')
+
         }
         clearTimeout(timeout);
         timeout = setTimeout(() => {
-            socket.broadcast.emit('stopped-typing', user)
+            socket.broadcast.to(room).emit('stopped-typing', user)
             typing = false
         }, 1500)
 
     })
 
     socket.on('message', (msg: message) => {
-        io.emit('message', msg)
+        io.to(room).emit('message', msg)
     })
 
     socket.on('disconnect', () => {
-        const index = users.findIndex((user) => user.socketId === socket.id)
-        if (index >= 0) {
-            socket.broadcast.emit('message', { message: `${users[index].name} left :/`, sender: { id: 'admin', name: null } })
-            socket.broadcast.emit('left', users[index])
-            users.splice(index, 1)
+        const roomIndex = users.findIndex((user) => user.room === room)
+        if (roomIndex >= 0) {
+            const index = users[roomIndex].members.findIndex((user) => user.socketId === socket.id)
+            if (index >= 0) {
+                socket.broadcast.to(room).emit('message', { message: `${users[roomIndex].members[index].name} left :/`, sender: { id: 'admin', name: null } })
+                socket.broadcast.to(room).emit('left', users[roomIndex].members[index])
+                users.splice(index, 1)
+            }
         }
         console.log('Disconnected')
 
